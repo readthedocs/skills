@@ -1,39 +1,30 @@
 ---
 name: readthedocs-search-api
-description: Query the Read the Docs Search API to find documentation across projects and repositories. Use when searching documentation, finding related docs, or gathering information about projects on Read the Docs.
+description: Query the Read the Docs Search API to find documentation across projects and repositories. Use when searching documentation, finding related docs, finding API documentation, or gathering information about projects on Read the Docs.
+metadata:
+  source: "https://github.com/readthedocs/readthedocs.org/pull/12601"
 ---
 
 # Read the Docs Search API
 
-Search across millions of pages of documentation hosted on Read the Docs using the public Search API.
+Query the public Read the Docs Search API to find documentation across millions of pages.
 
-## Overview
+## Step-by-step instructions
 
-The Read the Docs Search API allows you to search documentation indexed by Read the Docs. This is useful for finding documentation, understanding project structures, and gathering information about projects hosted on the platform.
+### 1. Make a search request
 
-**Base URL**: `https://readthedocs.org/api/v3/search/`
-
-## Authentication
-
-The Search API is public and does not require authentication. You can make requests directly without API tokens.
-
-## Search Endpoint
-
-### Request
-
+Query the API using:
 ```
 GET https://readthedocs.org/api/v3/search/?q={query}&page={page}
 ```
 
-### Query Parameters
+Required parameters:
+- `q`: Your search query (e.g., "authentication", "API pagination")
+- `page`: Result page number (default: 1)
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `q` | string | **Required**. Search query (e.g., "authentication", "API docs") |
-| `page` | integer | Page number for paginated results (default: 1) |
+### 2. Parse the response
 
-### Response Format
-
+The API returns JSON with this structure:
 ```json
 {
   "count": 1234,
@@ -60,61 +51,25 @@ GET https://readthedocs.org/api/v3/search/?q={query}&page={page}
 }
 ```
 
-### Response Fields
+### 3. Handle pagination
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `count` | integer | Total number of results |
-| `next` | string | URL for next page (null if no more pages) |
-| `previous` | string | URL for previous page (null if first page) |
-| `results` | array | Array of search result objects |
+If there are more results, use the `next` URL to fetch the next page. Continue until `next` is null.
 
-### Result Object Fields
+## Examples
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Unique result identifier (project:title) |
-| `project` | string | Project slug/name |
-| `version` | string | Documentation version (e.g., "latest", "stable") |
-| `title` | string | Page title |
-| `path` | string | URL path to the documentation |
-| `domain` | string | Read the Docs domain for the project |
-| `highlight` | string | HTML snippet showing matched text with `<mark>` tags |
-| `blocks` | array | Sections within the page that match the query |
-
-## Usage Examples
-
-### Basic Search
-
-Search for "authentication" across all documentation:
-
+### Search for authentication documentation
 ```bash
 curl "https://readthedocs.org/api/v3/search/?q=authentication"
 ```
 
-### Search with Pagination
-
-Get the second page of results:
-
+### Search with pagination
 ```bash
 curl "https://readthedocs.org/api/v3/search/?q=API&page=2"
 ```
 
-### Search Specific Project
-
-To find documentation for a specific project, use the project name in your query:
-
-```bash
-curl "https://readthedocs.org/api/v3/search/?q=project:django+forms"
-```
-
-### Parse Results Programmatically
-
-Example parsing search results:
-
+### Parse results with Python
 ```python
 import requests
-import json
 
 response = requests.get(
     "https://readthedocs.org/api/v3/search/",
@@ -123,64 +78,14 @@ response = requests.get(
 
 data = response.json()
 for result in data['results']:
-    print(f"Project: {result['project']}")
-    print(f"Title: {result['title']}")
-    print(f"Domain: {result['domain']}")
-    print(f"Path: {result['path']}")
-    print("---")
+    print(f"{result['project']}: {result['title']}")
+    print(f"  Domain: {result['domain']}")
+    print(f"  Path: {result['path']}")
 ```
 
-## Best Practices
-
-### Query Formulation
-
-- **Be specific**: Use detailed keywords for better results (e.g., "JWT authentication" instead of "auth")
-- **Use project names**: Prefix with project name for focused searches (e.g., "django:ORM")
-- **Handle quotes**: Wrap multi-word phrases in quotes for exact matches
-
-### Rate Limiting
-
-- The API has reasonable rate limits for public use
-- If you receive 429 responses, implement exponential backoff
-- Cache results when possible to reduce API calls
-
-### Error Handling
-
+### Get all paginated results
 ```python
-import requests
-
-try:
-    response = requests.get(
-        "https://readthedocs.org/api/v3/search/",
-        params={"q": "query"},
-        timeout=10
-    )
-    response.raise_for_status()
-    results = response.json()
-except requests.exceptions.RequestException as e:
-    print(f"Search failed: {e}")
-```
-
-## Common Use Cases
-
-### Find Documentation for a Topic
-
-```bash
-curl "https://readthedocs.org/api/v3/search/?q=websockets"
-```
-
-### Search Within a Specific Project
-
-```bash
-curl "https://readthedocs.org/api/v3/search/?q=django+middleware"
-```
-
-### Get All Results for a Query
-
-Handle pagination to retrieve all results:
-
-```python
-def get_all_results(query):
+def search_all(query):
     all_results = []
     page = 1
     while True:
@@ -196,52 +101,14 @@ def get_all_results(query):
     return all_results
 ```
 
-## Response Codes
+## Common edge cases
 
-| Code | Meaning |
-|------|---------|
-| 200 | Success - Results returned |
-| 400 | Bad Request - Invalid query parameters |
-| 429 | Rate Limited - Too many requests |
-| 503 | Service Unavailable - Temporary issue |
+**No authentication required**: The Search API is public and does not require API keys or authentication.
 
-## Limitations
+**Rate limiting**: The API applies reasonable rate limits. If you receive HTTP 429, implement exponential backoff.
 
-- Results are limited to publicly available documentation
-- Private documentation is not included in search results
-- Search index updates may have a slight delay (typically seconds to minutes)
-- Maximum query length is subject to URL constraints
+**Private documentation excluded**: Only publicly available documentation is searchable. Private projects are not included.
 
-## Tips for Using This Skill
+**Search delay**: The search index updates with a slight delay. New documentation may not appear immediately.
 
-When searching documentation:
-
-1. **Start with broad queries** if you're unsure of the exact terminology
-2. **Review the highlights** in results to understand context
-3. **Check multiple results** - there may be relevant documentation in different projects
-4. **Use project information** to navigate to the full documentation
-5. **Cache results** when building tools that make multiple searches
-
-## Examples
-
-### Finding REST API Documentation
-
-```
-Search: "REST API pagination"
-Result: Django REST Framework pagination docs
-Domain: django-rest-framework.org
-```
-
-### Finding Security Best Practices
-
-```
-Search: "password hashing best practices"
-Result: Multiple frameworks with security guidelines
-```
-
-### Locating Version-Specific Documentation
-
-```
-Search: "deprecation warnings version 2.0"
-Result: Release notes and migration guides
-```
+**Empty results**: If a query returns no results, try simpler keywords or browse the project directly on Read the Docs.
