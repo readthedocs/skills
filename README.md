@@ -40,7 +40,7 @@ Skills are automatically discovered by Claude and other compatible agents. Simpl
 
 Example:
 ```
-Can you find documentation on Django REST Framework authentication?
+Can you find documentation on the Read the Docs YAML file
 ```
 
 The Read the Docs Search API skill will activate and search the API for relevant documentation.
@@ -76,4 +76,4 @@ These skills are available under the MIT License. See LICENSE for details.
 - [Agent Skills Home](https://agentskills.io)
 - [Agent Skills Specification](https://agentskills.io/specification)
 - [Read the Docs](https://readthedocs.org)
-- [Read the Docs API Documentation](https://docs.readthedocs.io/en/stable/api/v3/)
+- [Read the Docs Search API Documentation](https://docs.readthedocs.com/platform/stable/server-side-search/syntax.html)

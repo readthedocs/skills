@@ -1,0 +1,25 @@
+site_name: Read the Docs Skills
+site_description: Agent skills for Read the Docs APIs and services.
+site_url: https://readthedocs.org/
+repo_url: https://github.com/readthedocs/skills
+repo_name: readthedocs/skills
+
+nav:
+  - Home: index.md
+  - Skills: skills.md
+  - Contributing: contributing.md
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.top
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: amber
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true

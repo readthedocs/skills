@@ -22,6 +22,9 @@ Required parameters:
 - `q`: Your search query (e.g., "authentication", "API pagination")
 - `page`: Result page number (default: 1)
 
+Note on scoping: You will generally get better and more consistent results by scoping your query to a specific project. Use fielded search syntax inside `q`, for example `project:{project-slug} your terms`.
+Examples: `project:docs build`, `project:sphinx configuration`.
+
 ### 2. Parse the response
 
 The API returns JSON with this structure:
@@ -60,6 +63,26 @@ If there are more results, use the `next` URL to fetch the next page. Continue u
 ### Search for authentication documentation
 ```bash
 curl "https://readthedocs.org/api/v3/search/?q=authentication"
+```
+
+### Search within a specific project
+```bash
+curl "https://readthedocs.org/api/v3/search/?q=project:docs%20authentication"
+```
+
+### Project-scoped quick queries
+```bash
+# Sphinx
+curl "https://readthedocs.org/api/v3/search/?q=project:sphinx%20configuration"
+curl "https://readthedocs.org/api/v3/search/?q=project:sphinx%20autodoc"
+
+# Requests
+curl "https://readthedocs.org/api/v3/search/?q=project:requests%20proxies"
+curl "https://readthedocs.org/api/v3/search/?q=project:requests%20authentication"
+
+# Read the Docs
+curl "https://readthedocs.org/api/v3/search/?q=project:readthedocs%20build"
+curl "https://readthedocs.org/api/v3/search/?q=project:readthedocs%20redirects"
 ```
 
 ### Search with pagination
@@ -112,3 +135,5 @@ def search_all(query):
 **Search delay**: The search index updates with a slight delay. New documentation may not appear immediately.
 
 **Empty results**: If a query returns no results, try simpler keywords or browse the project directly on Read the Docs.
+
+**Project scoping recommended**: The global index is large and queries can be broad. For most use cases, include a `project:{project-slug}` filter in `q` to scope results to the relevant documentation project.
